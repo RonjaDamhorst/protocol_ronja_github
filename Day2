@@ -1,0 +1,28 @@
+#for the fastqc i wrote this forward loop
+for file in /work_beegfs/sunam229/metagenomics/0_raw_reads/*.gz;do 
+    fastqc "$file" -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastqc_output; 
+done
+
+# for fastp i did
+fastp -i sample1_R1.fastq.gz -I sample1_R2.fastq.gz -R fastp_report -o sample1_R1_clean.fastq.gz -O sample1_R2_clean.fastq.gz -t 6 -q 20
+
+
+fastp -i /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130305_mapped_R1.fastq.gz -I /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130305_mapped_R2.fastq.gz -R fastp_report1 -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130305_mapped_R1_clean.fastq.gz -O /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130305_mapped_R2_clean.fastq.gz -t 6 -q 20
+fastp -i /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130527_mapped_R1.fastq.gz -I /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130527_mapped_R2.fastq.gz -R fastp_report2 -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130527_mapped_R1_clean.fastq.gz -O /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130527_mapped_R2_clean.fastq.gz -t 6 -q 20
+fastp -i /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130708_mapped_R1.fastq.gz -I /work_beegfs/sunam229/metagenomics/0_raw_reads/BGR_130708_mapped_R2.fastq.gz -R fastp_report3 -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130708_mapped_R1_clean.fastq.gz -O /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/BGR_130708_mapped_R2_clean.fastq.gz -t 6 -q 20
+
+
+#dann:
+squeue -u sunam229
+sbatch template.sh
+
+#for the assembly 
+megahit -1 /work_beegfs/sunam229/metagenomics/0_raw_reads/fastq_output/BGR_130305_mapped_R1_clean.fastq.gz -1 BGR130527_mapped_R1_clean.fastq.gz -1 BGR_130708_mapped_R1_clean.fastq.gz -2 BGR_130305_mapped_R2_clean.fastq.gz -2 BGR_130527_mapped_R2_clean.fastq.gz -2 BGR_130708_mapped_R2_clean.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 -o /assembly_output/ -t 12   
+
+
+
+micromamba activate .micromamba/envs/00_anvio/
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output
+megahit -1 BGR_130305_mapped_R1_clean.fastq.gz -1 BGR_130527_mapped_R1_clean.fastq.gz -1 BGR_130708_mapped_R1_clean.fastq.gz -2 BGR_130305_mapped_R2_clean.fastq.gz -2 BGR_130527_mapped_R2_clean.fastq.gz -2 BGR_130708_mapped_R2_clean.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/ -t 12   
+
+
