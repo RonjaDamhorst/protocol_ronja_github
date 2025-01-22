@@ -69,9 +69,108 @@ mkdir 4_mapping
 micromamba activate .micromamba/envs/00_anvio/
 cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output
 
-for i in *_R1_clean.fastq.gz; do
-  base="${i%_R1_clean.fastq.gz}"; bowtie2 --very-fast -x /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.anvio.fa.index -1 $i -2 "$base"_R2_clean.fastq.gz -S /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/"${base}".sam 
+for i in *_R1_clean.fastq.gz; dcd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_outputbam
+#finish
+samtools view -bS sam_file.sam > bam_file.bam
+#in a loop
+cd /PATH/TO/MAPPING/OUT
+for i in *.sam; do samtools view -bS $i > "$i".bam; done
+#used
+cd $WORK
+micromamba activate .micromamba/envs/00_anvio/
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+for i in *.sam; do samtools view -bS $i > "$i".bam; done
+
+
+# for contigs data preperation :
+micromamba activate .micromamba/envs/00_anvio/
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5
+
+anvi-gen-contigs-database -f contigs.anvio.fa -o contigs.db -n 'biol217'
+
+#for hmm search
+anvi-run-hmms -c contigs.db
+
+#for access anvio interactive 
+#for this follow the tutorial
+
+#for binning with anvio:
+# first sorting the .bam files
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+for i in *.bam; do anvi-init-bam $i -o "$i".sorted.bam; done
+# then create an anvio profile 
+anvi-profile -i ? -c ? --output-dir ?
+#finish command 
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+anvi-profile -i YOUR_SORTED.bam -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db --output-dir Anvioprofil
+
+#or in a loop
+
+for i in *.sorted.bam; do
+  base="${.sam.bam.sorted.bam}"
+  anvi-profile -i "$i" -c contigs.db -o ${base}
 done
+
+#failed loop
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+for i in *.sorted.bam; do
+  base="${.sam.bam.sorted.bam}"
+  anvi-profile -i "$i" -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -o ${base}
+done
+
+#final used
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+anvi-profile -i BGR_130305_mapped.sam.bam.sorted.bam -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db --output-dir Anvioprofil130305
+# do this 3 times for everyone seperately and different outoutfolders
+
+#always use 
+squeue -u sunam229
+sbatch template.sh
+
+#for merging the profiles
+anvi-merge /PATH/TO/SAMPLE1/PROFILE.db /PATH/TO/SAMPLE2/PROFILE.db /PATH/TO/SAMPLE3/PROFILE.db -o /PATH/TO/merged_profiles -c /PATH/TO/contigs.db --enforce-hierarchical-clustering
+#final used version:
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+anvi-merge /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/Anvioprofil130305/PROFILE.db /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/Anvioprofil130527/PROFILE.db /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/Anvioprofil130708/PROFILE.db -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db --enforce-hierarchical-clustering
+
+#binning with metabat2
+anvi-cluster-contigs -p ? -c ? -C METABAT2 --driver metabat2 --just-do-it --log-file log-metabat2
+
+anvi-summarize -p /PATH/TO/merged_profiles/? -c ? -o SUMMARY_METABAT2 -C ?
+
+#finish command 
+anvi-cluster-contigs -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db -C METABAT2 --driver metabat2 --just-do-it --log-file log-metabat2
+
+anvi-summarize -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db -o SUMMARY_METABAT2 -C METABAT2
+
+#final used command 
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+anvi-cluster-contigs -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles/PROFILE.db -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -C METABAT2 --driver metabat2 --just-do-it --log-file log-metabat2
+
+anvi-summarize -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles/PROFILE.db -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -o SUMMARY_METABAT2 -C METABAT2
+
+#for maxbin
+#command
+anvi-cluster-contigs -p ? -c ? -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
+
+anvi-summarize -p /PATH/TO/merged_profiles/? -c ? -o SUMMARY_MAXBIN2 -C ?
+#finish command
+anvi-cluster-contigs -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
+
+anvi-summarize -p /PATH/TO/merged_profiles/PROFILE.db -c /PATH/TO/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
+
+#final used command 
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping
+
+anvi-cluster-contigs -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles/PROFILE.db  -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
+
+anvi-summarize -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles/PROFILE.db  -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
+
+
+
+
+
+
 
 
 
