@@ -1,0 +1,78 @@
+#for the assembly visualisation :
+grep -c ">" /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/final.contigs.fa
+# 55836
+
+# for bandage:
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5
+megahit_toolkit contig2fastg 99 final.contigs.fa > final.contigs.fastg   
+# then open the file in Bandage and click draw graph 
+
+
+# for Quality Assessment of Assemblies: 
+# ATTENTION use the template 
+# basic command 
+  metaquast -t 6 -o ? -m 1000 ?       
+# finish command 
+   metaquast -t 6 -o /PATH/TOassemblyfolder/3_metaquast -m 1000 final.contigs.fa 
+# used full command    
+   metaquast -t 6 -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/3_metaquast -m 1000 final.contigs.fa 
+
+# 
+# Genome 	# fragments 	Length, bp 	Mean genome fraction, % 	# misassembled blocks
+#Fermentimonas caenicola 	1 	2 808 926 	11.866 	22
+#Hungateiclostridium saccincola 	4 	3 759 855 	11.361 	83
+#Methanoculleus bourgensis MS2 	1 	2 789 773 	52.544 	256
+#Petrimonas mucosa 	1 	3 717 632 	11.748 	75
+#Statistics without reference	
+# contigs 	54811
+#Largest contig	324907
+#Total length	140329923
+#Total length (>= 1000 bp)	140329923
+#Total length (>= 10000 bp)	34184785
+#Total length (>= 50000 bp)	8011046
+
+
+# then 
+#dann:
+squeue -u sunam229
+sbatch template.sh
+
+
+
+# for genome binding :
+anvi-script-reformat-fasta ? -o ? --min-len 1000 --simplify-names --report-file name_conversion.txt
+#finish command
+anvi-script-reformat-fasta final.contigs.fa -o /PATh/to//contigs.anvio.fa --min-len 1000 --simplify-names --report-file name_conversion.txt
+#used final command
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5
+anvi-script-reformat-fasta final.contigs.fa -o /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.anvio.fa --min-len 1000 --simplify-names --report-file name_conversion.txt
+
+# for mapping
+# first :
+bowtie2-build contigs.anvio.fa contigs.anvio.fa.index
+# then :
+bowtie2 --very-fast -x contigs.anvio.fa.index -1 ? -2 ? -S ?
+#finish comands:
+bowtie2 --very-fast -x contigs.anvio.fa.index -1 /PATH/TO/sample1_R1_clean.fastq.gz -2 /PATH/TO/sample1_R2_clean.fastq.gz -S SAMPLE.sam
+# or loop
+#1. go to fastp folder
+
+cd /PATH/TO/FASTP
+
+for i in $*_R1_clean.fastq.gz; do
+  base="${i%_R1_clean.fastq.gz}"; bowtie2 --very-fast -x /PATH/TO/index -1 $i -2 "$base"_R2_clean.fastq.gz -S /PATH/TO/4_mapping/"${base}".sam 
+done
+
+# final used one 
+mkdir 4_mapping
+
+micromamba activate .micromamba/envs/00_anvio/
+cd /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output
+
+for i in *_R1_clean.fastq.gz; do
+  base="${i%_R1_clean.fastq.gz}"; bowtie2 --very-fast -x /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.anvio.fa.index -1 $i -2 "$base"_R2_clean.fastq.gz -S /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/"${base}".sam 
+done
+
+
+
+
