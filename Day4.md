@@ -1,3 +1,4 @@
+´´´bash
 #path to contigs:
 /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db
 #path to mapped_profiles:
@@ -75,5 +76,10 @@ sbatch template.sh
 
 #METBAT44 visualised:
 ```bash
-![image](file:///home/uni-kiel.de/stu220627/Bilder/Bildschirmfotos/Bildschirmfoto%20vom%202025-01-23%2014-01-07.png)
+```
+
+![image](./resources/Bildschirmfoto%20vom%202025-01-23%2014-01-07.png)
+![alt text](<resources/Bildschirmfoto vom 2025-01-23 14-10-53.png>)
+![alt text](<resources/Bildschirmfoto vom 2025-01-23 14-11-42.png>)
+
 
