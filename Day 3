@@ -166,7 +166,12 @@ anvi-cluster-contigs -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_out
 
 anvi-summarize -p /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/4_mapping/mapped_profiles/PROFILE.db  -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assembly_output5/contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
 
-
+#Which binning strategy gives you the best quality for the archaea bins??
+# -> MetaBat2 
+#How many archaea  bins do you get that are of High Quality? 
+#-> one 
+#How many bacteria  bins do you get that are of High Quality?
+#-> 25
 
 
 
