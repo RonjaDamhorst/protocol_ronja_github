@@ -73,6 +73,13 @@ anvi-refine -c /work_beegfs/sunam229/metagenomics/0_raw_reads/fastp_output/assem
 squeue -u sunam229
 sbatch template.sh
 
+# do you get archaea bins that are chimeric ? 
+#-> no
+# what is a chimeric bin?
+#-> a chimeric bin includes wrongly assembled contigs from a different genome (contigs are comming from different organisms and not from one organism). 
+
+# does the wuality of archaea bins improve?
+# -> yes the wuality of the archaea bins improved ! 
 
 #METBAT44 visualised:
 ```bash
